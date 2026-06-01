@@ -1,0 +1,19 @@
+[build]
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Edge function: country + bot filter before any page loads
+[[edge_functions]]
+  function = "geo-gate"
+  path = "/*"
+
+# Verify human visitor, then return redirect URL (server-side only)
+[[redirects]]
+  from = "/api/verify"
+  to = "/.netlify/functions/verify"
+  status = 200

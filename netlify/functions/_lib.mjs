@@ -1,5 +1,6 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
+import { ADMIN_PASSWORD } from './config.mjs';
 
 const BOT_UA =
   /bot|crawl|spider|slurp|headless|phantom|selenium|puppeteer|playwright|scrapy|python-requests|curl\/|wget\/|httpclient|java\/|libwww|go-http|postman|insomnia|ahrefs|semrush|bytespider|petalbot|gptbot|claudebot|anthropic|facebookexternalhit|meta-externalagent/i;
@@ -47,17 +48,23 @@ export function newLinkId() {
 }
 
 export function authOk(event) {
-  const secret = process.env.ADMIN_SECRET || '';
-  if (!secret) return false;
-  const header = event.headers.authorization || event.headers.Authorization || '';
-  if (header === `Bearer ${secret}`) return true;
+  const header =
+    event.headers.authorization ||
+    event.headers.Authorization ||
+    event.headers['Authorization'] ||
+    '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : header;
+  if (token === ADMIN_PASSWORD) return true;
+
+  if (event.httpMethod === 'GET' || !event.body) return false;
+
   let body = {};
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
     return false;
   }
-  return body.secret === secret;
+  return body.secret === ADMIN_PASSWORD;
 }
 
 export const COUNTRIES = [

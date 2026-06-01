@@ -134,8 +134,8 @@
 
       <div id="login-card" class="card">
         <div class="field">
-          <label for="secret">Admin password (ADMIN_SECRET)</label>
-          <input id="secret" type="password" placeholder="password dial Netlify" autocomplete="current-password" />
+          <label for="secret">Admin password</label>
+          <input id="secret" type="password" placeholder="password dial site" autocomplete="current-password" />
         </div>
         <button type="button" id="login-btn">دخول</button>
         <p id="login-err" class="err hidden"></p>
@@ -316,12 +316,16 @@
               return r.json();
             })
             .then(function (data) {
-              if (!data.ok) {
-                sessionStorage.removeItem('admin_secret');
-                showErr(loginErr, 'Password ghalat');
+              if (data && data.ok) {
+                enterPanel();
                 return;
               }
-              enterPanel();
+              sessionStorage.removeItem('admin_secret');
+              if (data && data.reason === 'unauthorized') {
+                showErr(loginErr, 'Password ghalat');
+              } else {
+                showErr(loginErr, 'Error server — steen redeploy w jarreb');
+              }
             })
             .catch(function () {
               showErr(loginErr, 'Error');

@@ -3,30 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>Geo Redirect Gate</title>
-    <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        font-family: system-ui, sans-serif;
-        background: #0b1020;
-        color: #e8ecf4;
-        text-align: center;
-        padding: 1.5rem;
-      }
-      a {
-        color: #5b8cff;
-      }
-    </style>
+    <meta
+      name="description"
+      content="المشهد — أخبار المغرب والعالم العربي: تقنية، رياضة، اقتصاد وثقافة. تغطية يومية موثوقة."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="المشهد | أخبار المغرب والعالم العربي" />
+    <meta
+      property="og:description"
+      content="مصدرك اليومي للأخبار: تقنية، رياضة، اقتصاد ومجتمع في المغرب والمنطقة."
+    />
+    <meta property="og:locale" content="ar_MA" />
+    <title>المشهد | أخبار المغرب والعالم العربي</title>
+    <link rel="stylesheet" href="/css/news.css" />
+    <link rel="canonical" href="/" />
   </head>
   <body>
-    <div>
-      <h1>Geo Redirect Gate</h1>
-      <p>Zid links mn <a href="/admin.html">Admin panel</a></p>
-      <p style="opacity: 0.6; font-size: 0.9rem">Partaji link b7al: <code>/r/abc123</code></p>
-    </div>
+    <header class="site-header">
+      <div class="header-top">
+        <a class="brand" href="/">
+          <div class="brand-mark" aria-hidden="true">م</div>
+          <div>
+            <h1>المشهد</h1>
+            <span>أخبار المغرب والعالم العربي</span>
+          </div>
+        </a>
+        <time datetime="2026-06-01">الاثنين ١ يونيو ٢٠٢٦</time>
+      </div>
+      <nav class="nav-main" aria-label="الأقسام الرئيسية">
+        <a href="/">الرئيسية</a>
+        <a href="/article/streaming-tv-evolution-2025.html">تقنية</a>
+        <a href="/article/saudi-league-preview.html">رياضة</a>
+        <a href="/article/smart-home-morocco.html">مجتمع</a>
+        <a href="/about.html">من نحن</a>
+        <a href="/contact.html">اتصل بنا</a>
+      </nav>
+    </header>
+
+    <main class="layout layout--home">
+      <div>
+        <article class="hero-card">
+          <img
+            src="https://images.unsplash.com/photo-1504711434966-e33886168f5c?w=900&q=80"
+            alt="غرفة أخبار تلفزيونية"
+            width="900"
+            height="506"
+            loading="eager"
+          />
+          <div class="hero-body">
+            <span class="tag">تقنية</span>
+            <h2>
+              <a href="/article/streaming-tv-evolution-2025.html"
+                >كيف غيّرت منصات البث المباشر عادات المشاهدة في المغرب العربي</a
+              >
+            </h2>
+            <p class="meta">بقلم فريق التحرير · ١ يونيو ٢٠٢٦ · ٦ دقائق قراءة</p>
+            <p class="lead">
+              دراسات حديثة تُظهر أنّ أكثر من نصف الشباب في المغرب ودول الخليج يفضّلون المحتوى
+              الرقمي على التلفزيون التقليدي، مع نموّ ملحوظ في الاشتراكات القانونية والمحتوى
+              المحلي.
+            </p>
+          </div>
+        </article>
+
+        <h2 class="section-title" style="margin-top: 2rem">آخر الأخبار</h2>
+        <div class="card-grid">
+          <article class="news-card">
+            <img
+              src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80"
+              alt="ملعب كرة قدم"
+              width="600"
+              height="375"
+              loading="lazy"
+            />
+            <div class="body">
+              <span class="tag">رياضة</span>
+              <h3>
+                <a href="/article/saudi-league-preview.html"
+                  >دوري روشن: أبرز المواجهات قبل انطلاق الجولة المقبلة</a
+                >
+              </h3>
+              <p>تحليل للفرق المتصدرة وتوقعات الخبراء قبل مباريات نهاية الأسبوع.</p>
+            </div>
+          </article>
+          <article class="news-card">
+            <img
+              src="https://images.unsplash.com/photo-1558002038-1055907df827?w=600&q=80"
+              alt="منزل ذكي"
+              width="600"
+              height="375"
+              loading="lazy"
+            />
+            <div class="body">
+              <span class="tag">مجتمع</span>
+              <h3>
+                <a href="/article/smart-home-morocco.html"
+                  >المنازل الذكية في المغرب: فرص وتحديات للمستهلك</a
+                >
+              </h3>
+              <p>خبراء ينصحون بالتركيز على الأمان والكفاءة الطاقية عند اختيار الأجهزة.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="widget">
+          <h3>الأكثر قراءة</h3>
+          <ul>
+            <li>
+              <a href="/article/streaming-tv-evolution-2025.html">ثورة البث المباشر في ٢٠٢٥</a>
+            </li>
+            <li><a href="/article/saudi-league-preview.html">معاينة دوري روشن</a></li>
+            <li><a href="/article/smart-home-morocco.html">المنزل الذكي بالمغرب</a></li>
+          </ul>
+        </div>
+        <div class="widget">
+          <h3>عن المشهد</h3>
+          <p style="margin: 0; font-size: 0.88rem; color: var(--muted)">
+            منصة إخبارية مستقلة تغطي التقنية والرياضة والمجتمع في المغرب والشرق الأوسط.
+            <a href="/about.html">اعرف المزيد</a>
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div>
+          <h4>المشهد</h4>
+          <p>أخبار موثوقة بالعربية — تقنية، رياضة، ومجتمع.</p>
+        </div>
+        <div>
+          <h4>روابط</h4>
+          <ul>
+            <li><a href="/about.html">من نحن</a></li>
+            <li><a href="/contact.html">اتصل بنا</a></li>
+            <li><a href="/privacy.html">سياسة الخصوصية</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>أقسام</h4>
+          <ul>
+            <li><a href="/article/streaming-tv-evolution-2025.html">تقنية</a></li>
+            <li><a href="/article/saudi-league-preview.html">رياضة</a></li>
+            <li><a href="/article/smart-home-morocco.html">مجتمع</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="copyright">© ٢٠٢٦ المشهد. جميع الحقوق محفوظة.</p>
+    </footer>
   </body>
 </html>

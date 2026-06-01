@@ -323,8 +323,10 @@
               sessionStorage.removeItem('admin_secret');
               if (data && data.reason === 'unauthorized') {
                 showErr(loginErr, 'Password ghalat');
+              } else if (data && data.message) {
+                showErr(loginErr, 'Storage error: ' + data.message);
               } else {
-                showErr(loginErr, 'Error server — steen redeploy w jarreb');
+                showErr(loginErr, 'Error server — redeploy w jarreb');
               }
             })
             .catch(function () {

@@ -1,6 +1,10 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
-import { ADMIN_PASSWORD } from './config.mjs';
+
+// Bdl password hna
+export const ADMIN_PASSWORD = 'zbi';
+
+const INDEX_KEY = '__index__';
 
 const BOT_UA =
   /bot|crawl|spider|slurp|headless|phantom|selenium|puppeteer|playwright|scrapy|python-requests|curl\/|wget\/|httpclient|java\/|libwww|go-http|postman|insomnia|ahrefs|semrush|bytespider|petalbot|gptbot|claudebot|anthropic|facebookexternalhit|meta-externalagent/i;
@@ -33,14 +37,24 @@ export function getCountry(context, headers) {
   );
 }
 
-export function linksStore() {
+function store() {
   return getStore('geo-links');
+}
+
+export async function loadAllLinks() {
+  const data = await store().get(INDEX_KEY, { type: 'json' });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function saveAllLinks(links) {
+  await store().setJSON(INDEX_KEY, links);
 }
 
 export async function getLink(linkId) {
   if (!linkId || !/^[a-z0-9]{6,12}$/i.test(linkId)) return null;
-  const data = await linksStore().get(linkId.toLowerCase(), { type: 'json' });
-  return data || null;
+  const id = linkId.toLowerCase();
+  const links = await loadAllLinks();
+  return links.find((l) => l.id === id) || null;
 }
 
 export function newLinkId() {
@@ -51,7 +65,7 @@ export function authOk(event) {
   const header =
     event.headers.authorization ||
     event.headers.Authorization ||
-    event.headers['Authorization'] ||
+    event.headers['authorization'] ||
     '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : header;
   if (token === ADMIN_PASSWORD) return true;

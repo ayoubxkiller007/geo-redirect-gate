@@ -200,11 +200,7 @@
 
   function gateUrl(id) {
     var root = location.origin + siteBasePath();
-    /* GitHub Pages: /r/TOKEN (dots in path) breaks; use query on gate.html */
-    if (isStaticHost()) {
-      return root + '/gate.html?link=' + encodeURIComponent(id);
-    }
-    return root + '/r/' + encodeURIComponent(id);
+    return root + '/gate.html?link=' + encodeURIComponent(id);
   }
 
   function bytesToBase64Url(bytes) {

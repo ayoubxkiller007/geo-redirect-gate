@@ -1,40 +1,36 @@
 # Geo Redirect Gate
 
-Redirect site for Netlify: only visitors from **one country** pass through, bots are blocked, real humans get redirected to your link.
+Redirect links for ads: **pick a country per link**, block bots, real visitors only.
 
-## How it works
+## Quick start (Netlify)
 
-1. **Edge function** (`geo-gate`) — checks country via Netlify geo + blocks known bot user-agents before the page loads.
-2. **Verify function** — client waits ~1.3s (anti-bot), sends honeypot + timing check; server re-checks country and returns `REDIRECT_URL`.
-3. Wrong country → `/blocked.html`. Bot → 403 / silent fail.
+1. Deploy from GitHub: `ayoubxkiller007/geo-redirect-gate`
+2. Add env var: **`ADMIN_SECRET`** = strong password
+3. Open **`https://YOUR-SITE.netlify.app/admin.html`**
+4. Login → paste destination URL → choose country → **Create gate link**
+5. Copy link like `https://YOUR-SITE.netlify.app/r/a1b2c3d4e5` → use in Snap/TikTok/Meta ads
 
-## Deploy on Netlify (from GitHub)
+## How each link works
 
-1. Push this folder to a new GitHub repo.
-2. [Netlify](https://app.netlify.com) → **Add new site** → **Import from Git** → select the repo.
-3. Build settings (auto-detected from `netlify.toml`):
-   - **Publish directory:** `public`
-   - **Functions:** `netlify/functions`
-4. **Site settings → Environment variables** — add:
+| Step | What happens |
+|------|----------------|
+| Visitor opens `/r/{id}` | Bot user-agents blocked at edge |
+| Gate page | ~1.3s human check + honeypot |
+| Server verify | Re-checks country for that link + bot signals |
+| OK | Redirect to **your URL** (stored server-side) |
+| Wrong country / bot | Blocked |
 
-   | Variable | Example | Description |
-   |----------|---------|-------------|
-   | `ALLOWED_COUNTRY` | `MA` | 2-letter country code (Morocco = MA, Saudi = SA, UAE = AE…) |
-   | `REDIRECT_URL` | `https://yoursite.com/page` | Final link after verification |
+## Admin
 
-5. Deploy. Your gate URL is e.g. `https://your-site.netlify.app`.
+- **URL:** `/admin.html`
+- **Password:** same as `ADMIN_SECRET` in Netlify env
+- Add many links, each with its own country
 
-## Local test
+## Local dev
 
 ```bash
-npm i -g netlify-cli
+npm install
 netlify dev
 ```
 
-Set env in `.env` (see `.env.example`) or `netlify.toml` `[context.dev.environment]`.
-
-## Notes
-
-- Geo uses Netlify edge geo IP — VPN users may bypass or fail country check.
-- Bot filtering blocks common crawlers and automation UAs; no system is 100% bot-proof without CAPTCHA.
-- `REDIRECT_URL` stays server-side only — not exposed in HTML source.
+Set `ADMIN_SECRET` in `.env`.

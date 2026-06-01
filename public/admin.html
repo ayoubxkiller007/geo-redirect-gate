@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>إدارة الروابط</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0f1419;
+        color: #e7ecf3;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        margin: 0 0 0.25rem;
+      }
+      .sub {
+        opacity: 0.7;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+      .card {
+        background: #171d26;
+        border: 1px solid #2a3444;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 0.35rem;
+        opacity: 0.85;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        font: inherit;
+        border-radius: 8px;
+        border: 1px solid #3a4659;
+        padding: 0.65rem 0.75rem;
+        background: #0f1419;
+        color: inherit;
+      }
+      button {
+        background: #3d6ef5;
+        border-color: #3d6ef5;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 0.75rem;
+      }
+      button.secondary {
+        background: transparent;
+        color: #aab4c4;
+        border-color: #3a4659;
+        width: auto;
+        margin-top: 0;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.8rem;
+      }
+      button.danger {
+        background: #8b2e2e;
+        border-color: #8b2e2e;
+        width: auto;
+        margin-top: 0;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.8rem;
+      }
+      .field {
+        margin-bottom: 0.85rem;
+      }
+      .gate-link {
+        background: #0b1020;
+        border: 1px dashed #3d6ef5;
+        border-radius: 8px;
+        padding: 0.75rem;
+        word-break: break-all;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+      .list-item {
+        border-top: 1px solid #2a3444;
+        padding-top: 0.85rem;
+        margin-top: 0.85rem;
+      }
+      .list-item:first-child {
+        border-top: 0;
+        padding-top: 0;
+        margin-top: 0;
+      }
+      .meta {
+        font-size: 0.8rem;
+        opacity: 0.65;
+      }
+      .hidden {
+        display: none;
+      }
+      .err {
+        color: #ff8a8a;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+      }
+      .ok {
+        color: #7ddea8;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>إدارة الروابط</h1>
+      <p class="sub">زيد link + khtar l-wdla → copy link li tpartaji f ads</p>
+
+      <div id="login-card" class="card">
+        <div class="field">
+          <label for="secret">Admin password (ADMIN_SECRET)</label>
+          <input id="secret" type="password" placeholder="password dial Netlify" autocomplete="current-password" />
+        </div>
+        <button type="button" id="login-btn">دخول</button>
+        <p id="login-err" class="err hidden"></p>
+      </div>
+
+      <div id="panel" class="hidden">
+        <div class="card">
+          <h2 style="margin: 0 0 1rem; font-size: 1rem">➕ Add link</h2>
+          <div class="field">
+            <label for="url">Link (URL fin ghadi ymchi visitor)</label>
+            <input id="url" type="url" placeholder="https://example.com/offer" />
+          </div>
+          <div class="field">
+            <label for="country">Country (ghir had l-wdla)</label>
+            <select id="country"></select>
+          </div>
+          <div class="field">
+            <label for="label">Label (optional)</label>
+            <input id="label" type="text" placeholder="Snap MA campaign" />
+          </div>
+          <button type="button" id="add-btn">Create gate link</button>
+          <p id="add-msg" class="hidden"></p>
+          <div id="new-link-box" class="hidden">
+            <p style="margin: 0.75rem 0 0; font-size: 0.85rem">✅ Copy had link f ads:</p>
+            <div class="gate-link" id="new-gate-link"></div>
+            <div class="row">
+              <button type="button" class="secondary" id="copy-btn">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 style="margin: 0 0 0.5rem; font-size: 1rem">Links li 3andek</h2>
+          <div id="links-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var secretInput = document.getElementById('secret');
+        var loginBtn = document.getElementById('login-btn');
+        var loginErr = document.getElementById('login-err');
+        var loginCard = document.getElementById('login-card');
+        var panel = document.getElementById('panel');
+        var countrySelect = document.getElementById('country');
+        var linksList = document.getElementById('links-list');
+        var addMsg = document.getElementById('add-msg');
+        var newLinkBox = document.getElementById('new-link-box');
+        var newGateLink = document.getElementById('new-gate-link');
+
+        var secret = sessionStorage.getItem('admin_secret') || '';
+
+        function gateUrl(id) {
+          return window.location.origin + '/r/' + id;
+        }
+
+        function authHeaders() {
+          return {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + secret,
+          };
+        }
+
+        function showErr(el, text) {
+          el.textContent = text;
+          el.classList.remove('hidden');
+        }
+
+        function hideErr(el) {
+          el.classList.add('hidden');
+        }
+
+        function loadCountries() {
+          fetch('/api/links?public=countries')
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data.countries) return;
+              countrySelect.innerHTML = data.countries
+                .map(function (c) {
+                  return '<option value="' + c.code + '">' + c.name + '</option>';
+                })
+                .join('');
+            });
+        }
+
+        function renderLinks(links) {
+          if (!links.length) {
+            linksList.innerHTML = '<p class="meta">Ma kayn hta link.</p>';
+            return;
+          }
+          linksList.innerHTML = links
+            .map(function (link) {
+              return (
+                '<div class="list-item">' +
+                '<strong>' +
+                (link.label || link.id) +
+                '</strong> · ' +
+                link.country +
+                '<div class="meta">' +
+                link.url +
+                '</div>' +
+                '<div class="gate-link">' +
+                gateUrl(link.id) +
+                '</div>' +
+                '<div class="row">' +
+                '<button type="button" class="secondary" data-copy="' +
+                gateUrl(link.id) +
+                '">Copy</button>' +
+                '<button type="button" class="danger" data-del="' +
+                link.id +
+                '">Delete</button>' +
+                '</div></div>'
+              );
+            })
+            .join('');
+
+          linksList.querySelectorAll('[data-copy]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              navigator.clipboard.writeText(btn.getAttribute('data-copy'));
+            });
+          });
+
+          linksList.querySelectorAll('[data-del]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              if (!confirm('Delete?')) return;
+              fetch('/api/links?id=' + encodeURIComponent(btn.getAttribute('data-del')), {
+                method: 'DELETE',
+                headers: authHeaders(),
+              })
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function () {
+                  loadLinks();
+                });
+            });
+          });
+        }
+
+        function loadLinks() {
+          fetch('/api/links', { headers: authHeaders() })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data.ok) throw new Error('auth');
+              renderLinks(data.links || []);
+            })
+            .catch(function () {
+              sessionStorage.removeItem('admin_secret');
+              secret = '';
+              panel.classList.add('hidden');
+              loginCard.classList.remove('hidden');
+            });
+        }
+
+        function enterPanel() {
+          loginCard.classList.add('hidden');
+          panel.classList.remove('hidden');
+          loadLinks();
+        }
+
+        loginBtn.addEventListener('click', function () {
+          hideErr(loginErr);
+          secret = secretInput.value.trim();
+          if (!secret) {
+            showErr(loginErr, 'Kteb password');
+            return;
+          }
+          sessionStorage.setItem('admin_secret', secret);
+          fetch('/api/links', { headers: authHeaders() })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data.ok) {
+                sessionStorage.removeItem('admin_secret');
+                showErr(loginErr, 'Password ghalat');
+                return;
+              }
+              enterPanel();
+            })
+            .catch(function () {
+              showErr(loginErr, 'Error');
+            });
+        });
+
+        document.getElementById('add-btn').addEventListener('click', function () {
+          addMsg.className = 'hidden';
+          newLinkBox.classList.add('hidden');
+
+          fetch('/api/links', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({
+              url: document.getElementById('url').value.trim(),
+              country: countrySelect.value,
+              label: document.getElementById('label').value.trim(),
+            }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data.ok || !data.link) {
+                addMsg.textContent = 'Error: ' + (data.reason || 'failed');
+                addMsg.className = 'err';
+                return;
+              }
+              var g = gateUrl(data.link.id);
+              newGateLink.textContent = g;
+              newLinkBox.classList.remove('hidden');
+              addMsg.textContent = 'Link tcrea!';
+              addMsg.className = 'ok';
+              document.getElementById('url').value = '';
+              loadLinks();
+            });
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', function () {
+          navigator.clipboard.writeText(newGateLink.textContent);
+        });
+
+        loadCountries();
+        if (secret) {
+          enterPanel();
+        }
+      })();
+    </script>
+  </body>
+</html>

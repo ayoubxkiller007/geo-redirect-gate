@@ -1,19 +1,29 @@
 [build]
+  command = "npm install"
   publish = "public"
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# Edge function: country + bot filter before any page loads
 [[edge_functions]]
   function = "geo-gate"
   path = "/*"
 
-# Verify human visitor, then return redirect URL (server-side only)
 [[redirects]]
   from = "/api/verify"
   to = "/.netlify/functions/verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/links"
+  to = "/.netlify/functions/links"
+  status = 200
+
+[[redirects]]
+  from = "/r/:id"
+  to = "/gate.html?link=:id"
   status = 200

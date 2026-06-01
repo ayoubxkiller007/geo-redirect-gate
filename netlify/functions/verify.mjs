@@ -1,29 +1,8 @@
-const BOT_UA =
-  /bot|crawl|spider|slurp|headless|phantom|selenium|puppeteer|playwright|scrapy|python-requests|curl\/|wget\/|httpclient|java\/|libwww|go-http|postman|insomnia|ahrefs|semrush|bytespider|petalbot|gptbot|claudebot|anthropic|facebookexternalhit|meta-externalagent/i;
-
-const MIN_WAIT_MS = 1200;
-
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-    },
-    body: JSON.stringify(body),
-  };
-}
+import { getCountry, getLink, isBotUa, json, MIN_WAIT_MS } from './_lib.mjs';
 
 export const handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return json(405, { ok: false, reason: 'method' });
-  }
-
-  const redirectUrl = process.env.REDIRECT_URL || '';
-  const allowedCountry = (process.env.ALLOWED_COUNTRY || 'MA').toUpperCase();
-
-  if (!redirectUrl) {
-    return json(500, { ok: false, reason: 'missing_redirect' });
   }
 
   let body = {};
@@ -33,8 +12,18 @@ export const handler = async (event, context) => {
     return json(400, { ok: false, reason: 'bad_json' });
   }
 
+  const linkId = (body.linkId || '').trim().toLowerCase();
+  if (!linkId) {
+    return json(400, { ok: false, reason: 'missing_link' });
+  }
+
+  const link = await getLink(linkId);
+  if (!link) {
+    return json(404, { ok: false, reason: 'not_found' });
+  }
+
   const ua = event.headers['user-agent'] || body.ua || '';
-  if (!ua || BOT_UA.test(ua)) {
+  if (isBotUa(ua)) {
     return json(403, { ok: false, reason: 'bot' });
   }
 
@@ -51,17 +40,10 @@ export const handler = async (event, context) => {
     return json(403, { ok: false, reason: 'too_fast' });
   }
 
-  const country =
-    context.geo?.country?.code ||
-    event.headers['x-nf-client-connection-country'] ||
-    event.headers['x-nf-geo-country'] ||
-    event.headers['x-nf-client-geo-country'] ||
-    event.headers['x-country'] ||
-    '';
-
-  if (country && country.toUpperCase() !== allowedCountry) {
+  const country = getCountry(context, event.headers);
+  if (country && country.toUpperCase() !== link.country.toUpperCase()) {
     return json(403, { ok: false, reason: 'country', country });
   }
 
-  return json(200, { ok: true, redirect: redirectUrl });
+  return json(200, { ok: true, redirect: link.url });
 };

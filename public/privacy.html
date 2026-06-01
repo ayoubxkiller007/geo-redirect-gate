@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
+    <script>
+      (function () {
+        var base = '/';
+        if (location.hostname.endsWith('github.io')) {
+          var seg = location.pathname.split('/').filter(Boolean)[0];
+          if (seg) base = '/' + seg + '/';
+        }
+        var el = document.createElement('base');
+        el.href = base;
+        document.head.prepend(el);
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="سياسة الخصوصية لموقع المشهد — كيف نتعامل مع البيانات والملفات التقنية." />

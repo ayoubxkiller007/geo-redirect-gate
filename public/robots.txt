@@ -5,4 +5,4 @@ Disallow: /admin.html
 Disallow: /gate.html
 Disallow: /api/
 
-Sitemap: https://almashhad-news.netlify.app/sitemap.xml
+Sitemap: https://ayoubxkiller007.github.io/geo-redirect-gate/sitemap.xml

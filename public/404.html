@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var base = '/';
+        if (location.hostname.endsWith('github.io')) {
+          var seg = location.pathname.split('/').filter(Boolean)[0];
+          if (seg) base = '/' + seg + '/';
+        }
+        var el = document.createElement('base');
+        el.href = base;
+        document.head.prepend(el);
+
+        var path = location.pathname;
+        var match = path.match(/\/r\/([^/]+)\/?$/);
+        if (match) {
+          location.replace(base + 'gate.html?link=' + encodeURIComponent(match[1]));
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="المشهد — أخبار المغرب والعالم العربي: تقنية، رياضة، اقتصاد وثقافة."
+    />
+    <meta name="robots" content="index, follow" />
+    <title>المشهد | أخبار المغرب والعالم العربي</title>
+    <link rel="stylesheet" href="/css/news.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-top">
+        <a class="brand" href="/">
+          <div class="brand-mark" aria-hidden="true">م</div>
+          <div>
+            <h1>المشهد</h1>
+            <span>أخبار المغرب والعالم العربي</span>
+          </div>
+        </a>
+      </div>
+    </header>
+    <main class="layout">
+      <article class="article-page hero-card" style="padding: 1.5rem">
+        <span class="tag">تقنية</span>
+        <h1>كيف غيّرت منصات البث المباشر عادات المشاهدة في المغرب العربي</h1>
+        <p class="meta">بقلم سارة بنعلي · ١ يونيو ٢٠٢٦</p>
+        <div class="content">
+          <p>
+            شهدت السنوات الأخيرة تحولاً واضحاً في طريقة استهلاك المحتوى التلفزيوني في المغرب
+            ودول الخليج. لم يعد المشاهد يعتمد على جدول بث واحد، بل يختار ما يريده عبر تطبيقات
+            قانونية.
+          </p>
+          <p><a href="/">العودة للرئيسية</a></p>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

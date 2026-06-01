@@ -14,9 +14,12 @@
         document.head.prepend(el);
 
         var path = location.pathname;
-        var match = path.match(/\/r\/([^/]+)\/?$/);
-        if (match) {
-          location.replace(base + 'gate.html?link=' + encodeURIComponent(match[1]));
+        var rIdx = path.indexOf('/r/');
+        if (rIdx !== -1) {
+          var token = path.slice(rIdx + 3).replace(/\/$/, '');
+          if (token) {
+            location.replace(base + 'gate.html?link=' + encodeURIComponent(token));
+          }
         }
       })();
     </script>

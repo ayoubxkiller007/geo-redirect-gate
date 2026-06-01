@@ -199,7 +199,12 @@
   }
 
   function gateUrl(id) {
-    return location.origin + siteBasePath() + '/r/' + encodeURIComponent(id);
+    var root = location.origin + siteBasePath();
+    /* GitHub Pages: /r/TOKEN (dots in path) breaks; use query on gate.html */
+    if (isStaticHost()) {
+      return root + '/gate.html?link=' + encodeURIComponent(id);
+    }
+    return root + '/r/' + encodeURIComponent(id);
   }
 
   function bytesToBase64Url(bytes) {
@@ -295,7 +300,12 @@
       if (!opts.elapsedMs || opts.elapsedMs < MIN_WAIT_MS) return { ok: false, reason: 'too_fast' };
       return fetchVisitorCountry().then(function (country) {
         if (country && country !== link.country.toUpperCase()) {
-          return { ok: false, reason: 'country', country: country };
+          return {
+            ok: false,
+            reason: 'country',
+            country: country,
+            expected: link.country.toUpperCase(),
+          };
         }
         return { ok: true, redirect: link.url };
       });

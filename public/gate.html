@@ -70,6 +70,13 @@
         var started = Date.now();
         var params = new URLSearchParams(window.location.search);
         var linkId = decodeURIComponent(params.get('link') || '').trim();
+        if (!linkId) {
+          var path = location.pathname;
+          var rIdx = path.indexOf('/r/');
+          if (rIdx !== -1) {
+            linkId = decodeURIComponent(path.slice(rIdx + 3).replace(/\/$/, ''));
+          }
+        }
         var verifyDone = false;
 
         var viewLoading = document.getElementById('view-loading');
@@ -191,6 +198,13 @@
             if (data && data.ok && data.redirect) {
               redirectTo(data.redirect);
               return;
+            }
+            if (data && data.reason === 'country' && data.expected) {
+              document.getElementById('t-fail-lead').textContent =
+                locale.failLead + ' (' + data.expected + ' فقط)';
+            } else if (data && data.reason === 'not_found') {
+              document.getElementById('t-fail-lead').textContent =
+                'Link غير صالح — crei link جديد من admin';
             }
             showBlocked();
           }

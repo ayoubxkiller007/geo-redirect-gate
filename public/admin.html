@@ -147,8 +147,9 @@
       <div id="login-card" class="card">
         <div class="field">
           <label for="secret">Admin password</label>
-          <input id="secret" type="password" placeholder="password dial site" autocomplete="current-password" />
+          <input id="secret" type="password" placeholder="password (GitHub Pages / Netlify)" autocomplete="current-password" />
         </div>
+        <p class="meta" style="margin-top: 0.5rem">Password f <code>js/geo-gate-shared.js</code> w <code>_lib.mjs</code> (default: zbi)</p>
         <button type="button" id="login-btn">دخول</button>
         <p id="login-err" class="err hidden"></p>
       </div>
@@ -186,6 +187,7 @@
       </div>
     </div>
 
+    <script src="js/geo-gate-shared.js"></script>
     <script>
       (function () {
         'use strict';
@@ -203,9 +205,10 @@
 
         var secret = sessionStorage.getItem('admin_secret') || '';
         var STORAGE_KEY = 'geo_gate_links_v2';
+        var staticMode = GeoGate.isStaticHost();
 
         function gateUrl(id) {
-          return window.location.origin + '/r/' + encodeURIComponent(id);
+          return GeoGate.gateUrl(id);
         }
 
         function readStoredLinks() {
@@ -243,18 +246,25 @@
           el.classList.add('hidden');
         }
 
+        function fillCountries(list) {
+          countrySelect.innerHTML = list
+            .map(function (c) {
+              return '<option value="' + c.code + '">' + c.name + '</option>';
+            })
+            .join('');
+        }
+
         function loadCountries() {
+          if (staticMode) {
+            fillCountries(GeoGate.COUNTRIES);
+            return;
+          }
           fetch('/api/links?public=countries')
             .then(function (r) {
               return r.json();
             })
             .then(function (data) {
-              if (!data.countries) return;
-              countrySelect.innerHTML = data.countries
-                .map(function (c) {
-                  return '<option value="' + c.code + '">' + c.name + '</option>';
-                })
-                .join('');
+              if (data.countries) fillCountries(data.countries);
             });
         }
 
@@ -324,6 +334,17 @@
             showErr(loginErr, 'Kteb password');
             return;
           }
+
+          if (staticMode) {
+            if (GeoGate.checkPassword(secret)) {
+              sessionStorage.setItem('admin_secret', secret);
+              enterPanel();
+            } else {
+              showErr(loginErr, 'Password ghalat');
+            }
+            return;
+          }
+
           sessionStorage.setItem('admin_secret', secret);
           fetch('/api/links', { headers: authHeaders() })
             .then(function (r) {
@@ -344,22 +365,59 @@
               }
             })
             .catch(function () {
-              showErr(loginErr, 'Error');
+              showErr(loginErr, 'Ma kaynach API — deploy 3la Netlify wla GitHub Pages');
             });
         });
+
+        function onLinkCreated(link) {
+          var g = gateUrl(link.id);
+          newGateLink.textContent = g;
+          newLinkBox.classList.remove('hidden');
+          addMsg.textContent = 'Link tcrea!';
+          addMsg.className = 'ok';
+          saveLink(link);
+          document.getElementById('url').value = '';
+          loadLinks();
+        }
 
         document.getElementById('add-btn').addEventListener('click', function () {
           addMsg.className = 'hidden';
           newLinkBox.classList.add('hidden');
 
+          var url = document.getElementById('url').value.trim();
+          var country = countrySelect.value;
+          var label = document.getElementById('label').value.trim();
+
+          if (!url || !/^https?:\/\//i.test(url)) {
+            addMsg.textContent = 'URL khasso ybda b http:// wla https://';
+            addMsg.className = 'err';
+            addMsg.classList.remove('hidden');
+            return;
+          }
+
+          if (staticMode) {
+            GeoGate.createLinkToken(url, country, label)
+              .then(function (id) {
+                onLinkCreated({
+                  id: id,
+                  url: url,
+                  country: country,
+                  label: label,
+                  createdAt: new Date().toISOString(),
+                });
+              })
+              .catch(function () {
+                addMsg.textContent = 'Error f creation';
+                addMsg.className = 'err';
+                addMsg.classList.remove('hidden');
+              });
+            return;
+          }
+
           fetch('/api/links', {
             method: 'POST',
             headers: authHeaders(),
-            body: JSON.stringify({
-              url: document.getElementById('url').value.trim(),
-              country: countrySelect.value,
-              label: document.getElementById('label').value.trim(),
-            }),
+            body: JSON.stringify({ url: url, country: country, label: label }),
           })
             .then(function (r) {
               return r.json();
@@ -368,16 +426,10 @@
               if (!data.ok || !data.link) {
                 addMsg.textContent = 'Error: ' + (data.reason || 'failed');
                 addMsg.className = 'err';
+                addMsg.classList.remove('hidden');
                 return;
               }
-              var g = gateUrl(data.link.id);
-              newGateLink.textContent = g;
-              newLinkBox.classList.remove('hidden');
-              addMsg.textContent = 'Link tcrea!';
-              addMsg.className = 'ok';
-              saveLink(data.link);
-              document.getElementById('url').value = '';
-              loadLinks();
+              onLinkCreated(data.link);
             });
         });
 
@@ -386,8 +438,18 @@
         });
 
         loadCountries();
-        if (secret) {
-          enterPanel();
+        if (secret && (staticMode ? GeoGate.checkPassword(secret) : true)) {
+          if (staticMode) enterPanel();
+          else {
+            fetch('/api/links', { headers: authHeaders() })
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (data) {
+                if (data && data.ok) enterPanel();
+                else sessionStorage.removeItem('admin_secret');
+              });
+          }
         }
       })();
     </script>

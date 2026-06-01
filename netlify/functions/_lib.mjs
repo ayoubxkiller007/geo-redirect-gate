@@ -1,10 +1,7 @@
-import { getStore } from '@netlify/blobs';
 import crypto from 'crypto';
 
 // Bdl password hna
 export const ADMIN_PASSWORD = 'zbi';
-
-const INDEX_KEY = '__index__';
 
 const BOT_UA =
   /bot|crawl|spider|slurp|headless|phantom|selenium|puppeteer|playwright|scrapy|python-requests|curl\/|wget\/|httpclient|java\/|libwww|go-http|postman|insomnia|ahrefs|semrush|bytespider|petalbot|gptbot|claudebot|anthropic|facebookexternalhit|meta-externalagent/i;
@@ -37,28 +34,41 @@ export function getCountry(context, headers) {
   );
 }
 
-function store() {
-  return getStore('geo-links');
+export function createLinkToken(url, country, label = '') {
+  const payload = {
+    u: url,
+    c: country.toUpperCase(),
+    l: label,
+    t: Date.now(),
+  };
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', ADMIN_PASSWORD).update(data).digest('base64url').slice(0, 16);
+  return `${data}.${sig}`;
 }
 
-export async function loadAllLinks() {
-  const data = await store().get(INDEX_KEY, { type: 'json' });
-  return Array.isArray(data) ? data : [];
-}
+export function parseLinkToken(token) {
+  if (!token) return null;
+  const dot = token.lastIndexOf('.');
+  if (dot < 1) return null;
 
-export async function saveAllLinks(links) {
-  await store().setJSON(INDEX_KEY, links);
-}
+  const data = token.slice(0, dot);
+  const sig = token.slice(dot + 1);
+  const expected = crypto.createHmac('sha256', ADMIN_PASSWORD).update(data).digest('base64url').slice(0, 16);
+  if (sig !== expected) return null;
 
-export async function getLink(linkId) {
-  if (!linkId || !/^[a-z0-9]{6,12}$/i.test(linkId)) return null;
-  const id = linkId.toLowerCase();
-  const links = await loadAllLinks();
-  return links.find((l) => l.id === id) || null;
-}
-
-export function newLinkId() {
-  return crypto.randomBytes(5).toString('hex');
+  try {
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
+    if (!payload.u || !payload.c) return null;
+    return {
+      id: `${data}.${sig}`,
+      url: payload.u,
+      country: payload.c,
+      label: payload.l || '',
+      createdAt: payload.t ? new Date(payload.t).toISOString() : '',
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function authOk(event) {

@@ -1,11 +1,9 @@
 [build]
-  command = "npm install"
   publish = "public"
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["@netlify/blobs"]
 
 [build.environment]
   NODE_VERSION = "20"
@@ -25,6 +23,6 @@
   status = 200
 
 [[redirects]]
-  from = "/r/:id"
-  to = "/gate.html?link=:id"
+  from = "/r/*"
+  to = "/gate.html?link=:splat"
   status = 200

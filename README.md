@@ -2,13 +2,17 @@
 
 Redirect links for ads: **pick a country per link**, block bots, real visitors only.
 
+No database or Netlify Blobs — each gate link is a signed token in the URL.
+
 ## Quick start (Netlify)
 
 1. Deploy from GitHub: `ayoubxkiller007/geo-redirect-gate`
 2. Open **`https://YOUR-SITE.netlify.app/admin.html`**
-3. Login with password from **`netlify/functions/config.mjs`**
+3. Login with password from **`netlify/functions/_lib.mjs`** (`ADMIN_PASSWORD`)
 4. Paste destination URL → choose country → **Create gate link**
-5. Copy link like `https://YOUR-SITE.netlify.app/r/a1b2c3d4e5` → use in Snap/TikTok/Meta ads
+5. Copy link → use in Snap/TikTok/Meta ads
+
+**Note:** List of links is saved in your browser (localStorage). The gate URL itself works everywhere — share it in ads.
 
 ## How each link works
 

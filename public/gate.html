@@ -63,7 +63,7 @@
         var started = Date.now();
         var msg = document.getElementById('msg');
         var params = new URLSearchParams(window.location.search);
-        var linkId = (params.get('link') || '').trim().toLowerCase();
+        var linkId = decodeURIComponent(params.get('link') || '').trim();
 
         function looksLikeBot() {
           if (navigator.webdriver) return true;

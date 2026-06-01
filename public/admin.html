@@ -190,9 +190,29 @@
         var newGateLink = document.getElementById('new-gate-link');
 
         var secret = sessionStorage.getItem('admin_secret') || '';
+        var STORAGE_KEY = 'geo_gate_links_v2';
 
         function gateUrl(id) {
-          return window.location.origin + '/r/' + id;
+          return window.location.origin + '/r/' + encodeURIComponent(id);
+        }
+
+        function readStoredLinks() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function writeStoredLinks(links) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+        }
+
+        function saveLink(link) {
+          var links = readStoredLinks();
+          links.unshift(link);
+          writeStoredLinks(links);
         }
 
         function authHeaders() {
@@ -266,35 +286,17 @@
           linksList.querySelectorAll('[data-del]').forEach(function (btn) {
             btn.addEventListener('click', function () {
               if (!confirm('Delete?')) return;
-              fetch('/api/links?id=' + encodeURIComponent(btn.getAttribute('data-del')), {
-                method: 'DELETE',
-                headers: authHeaders(),
-              })
-                .then(function (r) {
-                  return r.json();
-                })
-                .then(function () {
-                  loadLinks();
-                });
+              var id = btn.getAttribute('data-del');
+              writeStoredLinks(readStoredLinks().filter(function (l) {
+                return l.id !== id;
+              }));
+              loadLinks();
             });
           });
         }
 
         function loadLinks() {
-          fetch('/api/links', { headers: authHeaders() })
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (data) {
-              if (!data.ok) throw new Error('auth');
-              renderLinks(data.links || []);
-            })
-            .catch(function () {
-              sessionStorage.removeItem('admin_secret');
-              secret = '';
-              panel.classList.add('hidden');
-              loginCard.classList.remove('hidden');
-            });
+          renderLinks(readStoredLinks());
         }
 
         function enterPanel() {
@@ -361,6 +363,7 @@
               newLinkBox.classList.remove('hidden');
               addMsg.textContent = 'Link tcrea!';
               addMsg.className = 'ok';
+              saveLink(data.link);
               document.getElementById('url').value = '';
               loadLinks();
             });

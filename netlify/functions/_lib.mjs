@@ -104,4 +104,5 @@ export const COUNTRIES = [
   { code: 'FR', name: 'France 🇫🇷' },
   { code: 'DE', name: 'Germany 🇩🇪' },
   { code: 'GB', name: 'UK 🇬🇧' },
+  { code: 'EE', name: 'Estonia 🇪🇪' },
 ];

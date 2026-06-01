@@ -187,9 +187,31 @@
       </div>
     </div>
 
-    <script src="js/geo-gate-shared.js"></script>
     <script>
-      (function () {
+      function loadGeoGateScript(cb) {
+        if (window.GeoGate) {
+          cb();
+          return;
+        }
+        var prefix = '';
+        if (location.hostname.endsWith('github.io')) {
+          var seg = location.pathname.split('/').filter(Boolean)[0];
+          if (seg) prefix = '/' + seg;
+        }
+        var s = document.createElement('script');
+        s.src = prefix + '/js/geo-gate-shared.js';
+        s.onload = cb;
+        s.onerror = function () {
+          var el = document.getElementById('login-err');
+          if (el) {
+            el.textContent = 'Fichier js ma telechargach — Cmd+Shift+R (hard refresh)';
+            el.classList.remove('hidden');
+          }
+        };
+        document.head.appendChild(s);
+      }
+
+      loadGeoGateScript(function initAdmin() {
         'use strict';
 
         var secretInput = document.getElementById('secret');
@@ -205,7 +227,6 @@
 
         var secret = sessionStorage.getItem('admin_secret') || '';
         var STORAGE_KEY = 'geo_gate_links_v2';
-        var staticMode = GeoGate.isStaticHost();
 
         function gateUrl(id) {
           return GeoGate.gateUrl(id);
@@ -246,6 +267,11 @@
           el.classList.add('hidden');
         }
 
+        if (!window.GeoGate) {
+          showErr(loginErr, 'GeoGate ma loadach — refresh la page');
+          return;
+        }
+
         function fillCountries(list) {
           countrySelect.innerHTML = list
             .map(function (c) {
@@ -255,17 +281,7 @@
         }
 
         function loadCountries() {
-          if (staticMode) {
-            fillCountries(GeoGate.COUNTRIES);
-            return;
-          }
-          fetch('/api/links?public=countries')
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (data) {
-              if (data.countries) fillCountries(data.countries);
-            });
+          fillCountries(GeoGate.COUNTRIES);
         }
 
         function renderLinks(links) {
@@ -334,39 +350,12 @@
             showErr(loginErr, 'Kteb password');
             return;
           }
-
-          if (staticMode) {
-            if (GeoGate.checkPassword(secret)) {
-              sessionStorage.setItem('admin_secret', secret);
-              enterPanel();
-            } else {
-              showErr(loginErr, 'Password ghalat');
-            }
-            return;
+          if (GeoGate.checkPassword(secret)) {
+            sessionStorage.setItem('admin_secret', secret);
+            enterPanel();
+          } else {
+            showErr(loginErr, 'Password ghalat — default: zbi');
           }
-
-          sessionStorage.setItem('admin_secret', secret);
-          fetch('/api/links', { headers: authHeaders() })
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (data) {
-              if (data && data.ok) {
-                enterPanel();
-                return;
-              }
-              sessionStorage.removeItem('admin_secret');
-              if (data && data.reason === 'unauthorized') {
-                showErr(loginErr, 'Password ghalat');
-              } else if (data && data.message) {
-                showErr(loginErr, 'Storage error: ' + data.message);
-              } else {
-                showErr(loginErr, 'Error server — redeploy w jarreb');
-              }
-            })
-            .catch(function () {
-              showErr(loginErr, 'Ma kaynach API — deploy 3la Netlify wla GitHub Pages');
-            });
         });
 
         function onLinkCreated(link) {
@@ -395,41 +384,27 @@
             return;
           }
 
-          if (staticMode) {
-            GeoGate.createLinkToken(url, country, label)
-              .then(function (id) {
-                onLinkCreated({
-                  id: id,
-                  url: url,
-                  country: country,
-                  label: label,
-                  createdAt: new Date().toISOString(),
-                });
-              })
-              .catch(function () {
-                addMsg.textContent = 'Error f creation';
-                addMsg.className = 'err';
-                addMsg.classList.remove('hidden');
-              });
+          if (!window.crypto || !window.crypto.subtle) {
+            addMsg.textContent = 'Khass HTTPS (ma http simple)';
+            addMsg.className = 'err';
+            addMsg.classList.remove('hidden');
             return;
           }
 
-          fetch('/api/links', {
-            method: 'POST',
-            headers: authHeaders(),
-            body: JSON.stringify({ url: url, country: country, label: label }),
-          })
-            .then(function (r) {
-              return r.json();
+          GeoGate.createLinkToken(url, country, label)
+            .then(function (id) {
+              onLinkCreated({
+                id: id,
+                url: url,
+                country: country,
+                label: label,
+                createdAt: new Date().toISOString(),
+              });
             })
-            .then(function (data) {
-              if (!data.ok || !data.link) {
-                addMsg.textContent = 'Error: ' + (data.reason || 'failed');
-                addMsg.className = 'err';
-                addMsg.classList.remove('hidden');
-                return;
-              }
-              onLinkCreated(data.link);
+            .catch(function (err) {
+              addMsg.textContent = 'Ma crea link: ' + (err && err.message ? err.message : 'crypto');
+              addMsg.className = 'err';
+              addMsg.classList.remove('hidden');
             });
         });
 
@@ -438,20 +413,10 @@
         });
 
         loadCountries();
-        if (secret && (staticMode ? GeoGate.checkPassword(secret) : true)) {
-          if (staticMode) enterPanel();
-          else {
-            fetch('/api/links', { headers: authHeaders() })
-              .then(function (r) {
-                return r.json();
-              })
-              .then(function (data) {
-                if (data && data.ok) enterPanel();
-                else sessionStorage.removeItem('admin_secret');
-              });
-          }
+        if (secret && GeoGate.checkPassword(secret)) {
+          enterPanel();
         }
-      })();
+      });
     </script>
   </body>
 </html>
